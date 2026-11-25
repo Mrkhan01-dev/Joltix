@@ -15,9 +15,7 @@ jobs:
       url: ${{ steps.d.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
-            - run: |
-          mkdir site
-          for f in joltix-part*.zip; do unzip -q -o "$f" -d site; done
+            - run: mkdir site for f in joltix-part*.zip; do unzip -q -o "$f" -d site; 
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

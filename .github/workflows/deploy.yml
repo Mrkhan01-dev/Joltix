@@ -1,24 +1,66 @@
+
 name: Deploy
+
 on:
   push:
     branches: [main]
   workflow_dispatch:
+
 permissions:
   contents: read
   pages: write
   id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
+
     environment:
       name: github-pages
       url: ${{ steps.d.outputs.page_url }}
+
     steps:
-      - uses: actions/checkout@v4
-            - run: mkdir site for f in joltix-part*.zip; do unzip -q -o "$f" -d site; 
-      - uses: actions/configure-pages@v5
-      - uses: actions/upload-pages-artifact@v3
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Extract website ZIP files
+        run: |
+          set -euo pipefail
+          mkdir -p site
+
+          shopt -s nullglob
+          zip_files=(joltix-part*.zip)
+
+          if [ ${#zip_files[@]} -eq 0 ]; then
+            echo "No Joltix ZIP files found!"
+            exit 1
+          fi
+
+          for f in "${zip_files[@]}"; do
+            echo "Extracting $f"
+            unzip -q -o "$f" -d site
+          done
+
+          if [ ! -f site/index.html ]; then
+            echo "ERROR: index.html not found!"
+            exit 1
+          fi
+
+          echo "Website files extracted successfully."
+
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload website
+        uses: actions/upload-pages-artifact@v3
         with:
           path: site
-      - id: d
+
+      - name: Deploy website
+        id: d
         uses: actions/deploy-pages@v4
+        

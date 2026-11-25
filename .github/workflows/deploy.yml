@@ -31,35 +31,41 @@ jobs:
       - name: Extract Joltix Part 1
         shell: bash
         run: |
-          set -e
+          set -euo pipefail
 
           mkdir -p site
 
           if [ ! -f joltix-part1.zip ]; then
-            echo "ERROR: joltix-part1.zip not found in repository root."
+            echo "ERROR: ZIP file not found!"
+            ls -la
             exit 1
           fi
 
           unzip -oq joltix-part1.zip -d site
 
           if [ ! -f site/index.html ]; then
-            echo "ERROR: Homepage index.html is missing."
+            echo "ERROR: index.html not found!"
             find site -maxdepth 3 -type f | head -50
             exit 1
           fi
 
           touch site/.nojekyll
 
-          echo "Joltix Part 1 extracted successfully."
+          echo "Website files:"
+          ls -lah site | head -30
 
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
 
-      - name: Upload website artifact
+      - name: Upload GitHub Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
+          name: github-pages
           path: site
 
       - name: Deploy Joltix
         id: deployment
         uses: actions/deploy-pages@v4
+        with:
+          artifact_name: github-pages
+          

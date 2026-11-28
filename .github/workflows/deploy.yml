@@ -19,6 +19,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: mkdir site && unzip -q joltix-site.zip -d site
+      - name: Add blog and blog sitemap
+        run: |
+          if [ -d blog ]; then mkdir -p site/blog && cp -r blog/. site/blog/; fi
+          if [ -f blog-sitemap.xml ]; then cp blog-sitemap.xml site/blog-sitemap.xml; fi
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v4
         with:

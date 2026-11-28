@@ -23,6 +23,22 @@ jobs:
         run: |
           if [ -d blog ]; then mkdir -p site/blog && cp -r blog/. site/blog/; fi
           if [ -f blog-sitemap.xml ]; then cp blog-sitemap.xml site/blog-sitemap.xml; fi
+      - name: Add Blog link to site footer
+        run: |
+          python3 - <<'PY'
+          import re, pathlib
+          pat = re.compile(r'(<a\s[^>]*href=["\']?[^"\' >]*contact/?["\']?[^>]*>\s*Contact\s*</a>)', re.I)
+          n = 0
+          for p in pathlib.Path('site').rglob('*.html'):
+              s = p.read_text(encoding='utf-8', errors='ignore')
+              if 'joltix.space/blog/' in s and 'Blog</a>' in s:
+                  continue
+              t, c = pat.subn(r'\1 · <a href="https://joltix.space/blog/">Blog</a>', s, count=1)
+              if c:
+                  p.write_text(t, encoding='utf-8')
+                  n += 1
+          print('Pages updated with Blog link:', n)
+          PY
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v4
         with:
